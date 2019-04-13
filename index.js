@@ -5,11 +5,19 @@ type Query{
     hello: String!
     user: User
 }
+type User{
+    name: String!
+    age: Int!
+}
 `;
 
 const resolvers = {
     Query: {
         hello: ()=>"asdf",
+        user: () => ({
+            name: "Someonse",
+            age: 23 
+        })
     }
 };
 
