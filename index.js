@@ -1,4 +1,4 @@
-const { ApolloServer, gql } = require("apollo-server");
+const { ApolloServer, gql, PubSub } = require("apollo-server");
 
 const user = {
     name: "Bob",
@@ -18,7 +18,13 @@ type User{
 type Mutation {
         me(mutation: String!): User
     }
+    type Subscription{
+        mutated: User!
+    }
 `;
+
+const MUTATED = 'MUTATED';
+const pubsub = new PubSub();
 
 const resolvers = {
     Query: {
@@ -26,17 +32,25 @@ const resolvers = {
         me: () => user
     },
     Mutation: {
-        me: (parent, args) => {
-            console.log(args);
-            if('mutation' in args){
-                user.mutation = args.mutation;
-            }
+        me: (parent, {mutation},{pubsub}) => {
+            user.mutation = mutation;
+            pubsub.publish(MUTATED,{
+                mutated: user
+            });
             return user;
         }
+    },
+    Subscription: {
+        mutated: {
+            subscribe: (_,__,{pubsub})=>pubsub.asyncIterator(MUTATED)
+        }
     }
-
 };
 
-const server = new ApolloServer({ typeDefs, resolvers});
+const server = new ApolloServer({ 
+    typeDefs, 
+    resolvers, 
+    context: ({req,res}) => ({req,res, pubsub})
+});
 
 server.listen().then(({url}) => console.log(url));
