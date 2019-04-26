@@ -47,7 +47,7 @@ type User{
 type Mutation {
         me(mutation: String!): User
     }
-    type Subscription{
+type Subscription{
         mutated: User!
     }
 `;
@@ -58,10 +58,7 @@ const pubsub = new PubSub();
 const resolvers = {
     Query: {
         hello: ()=>"asdf",
-        me: () => ({
-            name: "Someonse",
-            age: 23 
-        }),
+        me: () => user,
         epic: (args,{id}) => {
             return epics.find(epic=>epic.id==id);
         },
