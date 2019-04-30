@@ -19,8 +19,8 @@ module.exports.features=[
 ];
 
 module.exports.epics=[
-    {id: 1,     title: "Epic 1",   status: "InProgress",     epicid: 1},    
-    {id: 2,     title: "Epic 2",   status: "InProgress",     epicid: 2},    
-    {id: 3,     title: "Epic 3",   status: "Refinement",     epicid: 3},    
+    {id: 1,     title: "Epic 1",   status: "InProgress"},    
+    {id: 2,     title: "Epic 2",   status: "InProgress"},    
+    {id: 3,     title: "Epic 3",   status: "Refinement"},    
 
 ];

@@ -13,8 +13,10 @@ type Query{
     feature(id: ID): Feature
     story(id: ID): Story
     epic(id: ID): Epic
+    workitems: [WorkItem]
 }
 enum Status{
+    Refinement
     InProgress
     Done
     Accepted
@@ -22,6 +24,7 @@ enum Status{
 interface WorkItem{
     title: String!
     status: Status!
+    
 }
 type Story implements WorkItem{
     feature: Feature
@@ -69,6 +72,9 @@ const resolvers = {
             console.log(id);
             return stories.find(s=>s.id==id);
         },
+        workitems: ()=>{
+            return [...epics, ...features, ... stories];
+        }
     },
     Feature:{
         stories: (feature)=>{
@@ -85,8 +91,7 @@ const resolvers = {
         features: epic=>features.filter(feature=>feature.epicid==epic.id)
     },
     WorkItem: {
-        title: ()=>"a work item",
-        status: ()=>"Done"
+        __resolveType: (workitem)=>(!!workitem.featureid)?"Story":(!!workitem.epicid)?"Feature":"Epic"
     },
     Mutation: {
         me: (parent, {mutation},{pubsub}) => {
