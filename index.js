@@ -1,4 +1,4 @@
-const { ApolloServer, gql, PubSub } = require("apollo-server");
+const { ApolloServer, gql, PubSub, withFilter } = require("apollo-server");
 const {stories, features, epics} = require('./data.js');
 
 const user = {
@@ -49,9 +49,11 @@ type User{
 }
 type Mutation {
         me(mutation: String!): User
+        feature(id: ID!, status: Status): Feature
     }
 type Subscription{
         mutated: User!
+        feature(id: ID!): Feature
     }
 `;
 
@@ -65,7 +67,8 @@ const resolvers = {
         epic: (args,{id}) => {
             return epics.find(epic=>epic.id==id);
         },
-        feature: (args,{id}) => {
+        feature: (args,{id},s,w) => {
+            console.log(w.fieldNodes[0].selectionSet.selections.map(c=>c.name.value));
             return features.find(f=>f.id==id);
         },
         story: (args,{id})=>{
@@ -100,12 +103,27 @@ const resolvers = {
                 mutated: user
             });
             return user;
+        },
+        feature: (parent, {id, status},{pubsub}) => {
+            let feature =features.find(f=>f.id==id)
+            feature.status=status,
+            pubsub.publish('feature',{
+                feature: feature
+            });
+            return feature;
         }
+
     },
     Subscription: {
         mutated: {
             subscribe: (_,__,{pubsub})=>pubsub.asyncIterator(MUTATED)
-        }
+        },
+        feature: {
+                subscribe: withFilter(
+                     (_,__,{pubsub})=>pubsub.asyncIterator('feature'),
+                     (payload,variables)=>payload.feature.id == variables.id)
+            }
+        
     }
 };
 
