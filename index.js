@@ -50,10 +50,12 @@ type User{
 type Mutation {
         me(mutation: String!): User
         feature(id: ID!, status: Status): Feature
+        story(id: ID!, status: Status!): Story
     }
 type Subscription{
         mutated: User!
         feature(id: ID!): Feature
+        story(featureid: ID!): Story
     }
 `;
 
@@ -111,6 +113,14 @@ const resolvers = {
                 feature: feature
             });
             return feature;
+        },
+        story:(parent,{id, status},{pubsub})=>{
+            let story =stories.find(f=>f.id==id)
+            story.status=status,
+            pubsub.publish('story',{
+                story: story
+            });
+            return story;
         }
 
     },
@@ -119,10 +129,16 @@ const resolvers = {
             subscribe: (_,__,{pubsub})=>pubsub.asyncIterator(MUTATED)
         },
         feature: {
-                subscribe: withFilter(
+            subscribe: withFilter(
                      (_,__,{pubsub})=>pubsub.asyncIterator('feature'),
                      (payload,variables)=>payload.feature.id == variables.id)
-            }
+            },
+        story: {
+            subscribe: withFilter(
+                (_,__,{pubsub})=>pubsub.asyncIterator('story'),
+                (payload,variables)=>payload.story.featureid == variables.featureid)
+       
+        }
         
     }
 };
