@@ -7,5 +7,5 @@ npm start
 ```
 
 ```
-docker pull runesoft/graphqldemo
+docker run runesoft/graphqldemo
 ```
