@@ -7,9 +7,6 @@ Iterative API developments (tags in this repos)
 Structuring data in a graph
 Stichting APIs was mentioned, but not part of this repos.
 
-
-
-.
 ```
 npm install
 npm start
